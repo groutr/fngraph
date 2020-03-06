@@ -57,6 +57,9 @@ class FunctionCounter(ast.NodeVisitor):
     def visit_For(self, node):
         self._register_calls(node, node, is_loop=True)
 
+    def visit_While(self, node):
+        self._register_calls(node, node, is_loop=True)
+
     def visit_GeneratorExp(self, node):
         self._register_calls(node, node, is_loop=True)
 
@@ -106,7 +109,17 @@ class FunctionCounter(ast.NodeVisitor):
 
 
 def to_networkx(fnc, filter_builtins=True):
-    """Turn a fnc into an annotated networkx graph."""
+    """Turn a FunctionCounter into an annotated networkx graph.
+
+    Args:
+        fnc: FunctionCounter instance
+        filter_builtins: Filter out builtin function calls
+
+    Returns:
+        (networkx.MultiDiGraph)
+            edges represent calls to functions and are annotated if they
+            occur within a conditional block or looping construct.
+    """
     G = nx.MultiDiGraph()
     _builtins = set(dir(__builtins__))
     for v1, v2 in fnc.graph.items():
@@ -115,7 +128,10 @@ def to_networkx(fnc, filter_builtins=True):
                 G.add_edge(v1.name, e.obj.id, in_conditional=e.is_conditional, in_loop=e.is_loop)
     return G
 
+# Colormaps are defined by:
+# {(in_conditional?, in_loop?): color code}
 colors = {(True, True): 'brown', (True, False): 'cyan', (False, True): 'red', (False, False): 'black'}
+
 def color_vector(G, colormap):
     cl = []
     for u, v, data in G.edges(data=True):
