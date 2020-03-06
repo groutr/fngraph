@@ -93,7 +93,7 @@ class FunctionCounter(ast.NodeVisitor):
 
                 if isinstance(child, (ast.If, ast.IfExp)):
                     self._register_calls(child, parent_node, is_conditional=True, is_loop=is_loop)
-                elif isinstance(child, ast.For):
+                elif isinstance(child, (ast.For, ast.While)):
                     self._register_calls(child, parent_node, is_loop=True, is_conditional=is_conditional)
                 else:
                     self._register_calls(child, parent_node, is_conditional=is_conditional, is_loop=is_loop)
